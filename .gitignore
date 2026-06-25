@@ -1,0 +1,16 @@
+node_modules/
+dist/
+*.local
+.env
+.env.*
+
+# SQLite — dane lokalne, nie commituj
+backend/data/*.db
+backend/data/*.db-*
+
+# Logi / OS
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
