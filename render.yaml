@@ -1,10 +1,9 @@
 services:
   - type: web
     name: edytor-stron
-    runtime: node
+    runtime: docker
     plan: free
     region: frankfurt
     branch: main
-    buildCommand: npm run render-build
-    startCommand: NODE_ENV=production node backend/dist/index.js
+    dockerfilePath: ./Dockerfile
     healthCheckPath: /api/health
