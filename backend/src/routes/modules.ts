@@ -6,10 +6,13 @@ export function createModulesRouter(db: Database.Database): Router {
   const router = Router();
 
   router.get("/", (_req, res) => {
-    const modules = mapRows(db.prepare("SELECT * FROM modules ORDER BY name").all(), (row) => ({
-      ...row,
-      default_config: parseJsonField(row.default_config),
-    }));
+    const modules = mapRows(
+      db.prepare("SELECT * FROM modules ORDER BY name").all(),
+      (row) => ({
+        ...row,
+        default_config: parseJsonField(row.default_config),
+      }),
+    );
     res.json(modules);
   });
 

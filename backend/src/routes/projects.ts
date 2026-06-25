@@ -181,7 +181,9 @@ export function createProjectsRouter(db: Database.Database): Router {
       "UPDATE projects SET updated_at = datetime('now') WHERE id = ?",
     ).run(req.params.projectId);
 
-    const page = db.prepare("SELECT * FROM pages WHERE id = ?").get(pageId) as DbRow;
+    const page = db
+      .prepare("SELECT * FROM pages WHERE id = ?")
+      .get(pageId) as DbRow;
     res.status(201).json({ ...page, modules: [] });
   });
 
@@ -310,7 +312,9 @@ export function createProjectsRouter(db: Database.Database): Router {
       project: { name: project.name, description: project.description },
       pages: mapRows(
         db
-          .prepare("SELECT * FROM pages WHERE project_id = ? ORDER BY sort_order")
+          .prepare(
+            "SELECT * FROM pages WHERE project_id = ? ORDER BY sort_order",
+          )
           .all(req.params.projectId),
         (page) => ({
           name: page.name,
