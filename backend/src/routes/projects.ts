@@ -1,6 +1,7 @@
 import { Router } from "express";
 import Database from "better-sqlite3";
 import { v4 as uuidv4 } from "uuid";
+import { mapRows, parseJsonField, type DbRow } from "../db/helpers";
 import { PROJECT_TEMPLATES } from "../db/templates";
 
 function slugify(name: string): string {
@@ -89,10 +90,6 @@ export function createProjectsRouter(db: Database.Database): Router {
       return;
     }
 
-    const pages = db
-      .prepare("SELECT * FROM pages WHERE project_id = ? ORDER BY sort_order")
-      .all(req.params.id);
-
     const getModules = db.prepare(`
       SELECT pm.*, m.name as module_name, m.icon as module_icon
       FROM page_modules pm
@@ -101,15 +98,18 @@ export function createProjectsRouter(db: Database.Database): Router {
       ORDER BY pm.sort_order
     `);
 
-    const pagesWithModules = pages.map((page: Record<string, unknown>) => ({
-      ...page,
-      modules: getModules
-        .all(page.id as string)
-        .map((pm: Record<string, unknown>) => ({
+    const pagesWithModules = mapRows(
+      db
+        .prepare("SELECT * FROM pages WHERE project_id = ? ORDER BY sort_order")
+        .all(req.params.id),
+      (page) => ({
+        ...page,
+        modules: mapRows(getModules.all(String(page.id)), (pm) => ({
           ...pm,
-          config: JSON.parse(pm.config as string),
+          config: parseJsonField(pm.config),
         })),
-    }));
+      }),
+    );
 
     res.json({ ...project, pages: pagesWithModules });
   });
@@ -181,7 +181,7 @@ export function createProjectsRouter(db: Database.Database): Router {
       "UPDATE projects SET updated_at = datetime('now') WHERE id = ?",
     ).run(req.params.projectId);
 
-    const page = db.prepare("SELECT * FROM pages WHERE id = ?").get(pageId);
+    const page = db.prepare("SELECT * FROM pages WHERE id = ?").get(pageId) as DbRow;
     res.status(201).json({ ...page, modules: [] });
   });
 
@@ -189,16 +189,17 @@ export function createProjectsRouter(db: Database.Database): Router {
     const { name, slug } = req.body;
     const page = db
       .prepare("SELECT * FROM pages WHERE id = ? AND project_id = ?")
-      .get(req.params.pageId, req.params.projectId);
+      .get(req.params.pageId, req.params.projectId) as DbRow | undefined;
 
     if (!page) {
       res.status(404).json({ error: "Strona nie znaleziona" });
       return;
     }
 
+    const pageName = String(name ?? page.name);
     db.prepare("UPDATE pages SET name = ?, slug = ? WHERE id = ?").run(
-      name ?? (page as Record<string, string>).name,
-      slug ?? slugify(name ?? (page as Record<string, string>).name),
+      pageName,
+      slug ?? slugify(pageName),
       req.params.pageId,
     );
 
@@ -276,15 +277,17 @@ export function createProjectsRouter(db: Database.Database): Router {
 
     save();
 
-    const saved = db
-      .prepare(
-        "SELECT pm.*, m.name as module_name, m.icon as module_icon FROM page_modules pm LEFT JOIN modules m ON m.type = pm.module_type WHERE pm.page_id = ? ORDER BY pm.sort_order",
-      )
-      .all(req.params.pageId)
-      .map((pm: Record<string, unknown>) => ({
+    const saved = mapRows(
+      db
+        .prepare(
+          "SELECT pm.*, m.name as module_name, m.icon as module_icon FROM page_modules pm LEFT JOIN modules m ON m.type = pm.module_type WHERE pm.page_id = ? ORDER BY pm.sort_order",
+        )
+        .all(req.params.pageId),
+      (pm) => ({
         ...pm,
-        config: JSON.parse(pm.config as string),
-      }));
+        config: parseJsonField(pm.config),
+      }),
+    );
 
     res.json(saved);
   });
@@ -292,16 +295,12 @@ export function createProjectsRouter(db: Database.Database): Router {
   router.get("/:projectId/build", (req, res) => {
     const project = db
       .prepare("SELECT * FROM projects WHERE id = ?")
-      .get(req.params.projectId) as Record<string, unknown> | undefined;
+      .get(req.params.projectId) as DbRow | undefined;
 
     if (!project) {
       res.status(404).json({ error: "Projekt nie znaleziony" });
       return;
     }
-
-    const pages = db
-      .prepare("SELECT * FROM pages WHERE project_id = ? ORDER BY sort_order")
-      .all(req.params.projectId);
 
     const getModules = db.prepare(`
       SELECT * FROM page_modules WHERE page_id = ? ORDER BY sort_order
@@ -309,16 +308,19 @@ export function createProjectsRouter(db: Database.Database): Router {
 
     const build = {
       project: { name: project.name, description: project.description },
-      pages: pages.map((page: Record<string, unknown>) => ({
-        name: page.name,
-        slug: page.slug,
-        modules: getModules
-          .all(page.id as string)
-          .map((pm: Record<string, unknown>) => ({
+      pages: mapRows(
+        db
+          .prepare("SELECT * FROM pages WHERE project_id = ? ORDER BY sort_order")
+          .all(req.params.projectId),
+        (page) => ({
+          name: page.name,
+          slug: page.slug,
+          modules: mapRows(getModules.all(String(page.id)), (pm) => ({
             type: pm.module_type,
-            config: JSON.parse(pm.config as string),
+            config: parseJsonField(pm.config),
           })),
-      })),
+        }),
+      ),
       generatedAt: new Date().toISOString(),
     };
 

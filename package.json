@@ -11,12 +11,11 @@
     "dev:backend": "npm run dev --prefix backend",
     "dev:frontend": "npm run dev --prefix frontend",
     "install:all": "npm install --include=dev --prefix backend && npm install --include=dev --prefix frontend",
-    "build": "npm run build --prefix frontend",
-    "start": "cross-env NODE_ENV=production tsx backend/src/index.ts"
+    "build": "npm run build --prefix frontend && npm run build --prefix backend",
+    "start": "cross-env NODE_ENV=production node backend/dist/index.js"
   },
   "dependencies": {
-    "cross-env": "^7.0.3",
-    "tsx": "^4.20.3"
+    "cross-env": "^7.0.3"
   },
   "devDependencies": {
     "concurrently": "^9.2.0"

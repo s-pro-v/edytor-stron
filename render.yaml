@@ -8,3 +8,6 @@ services:
     buildCommand: npm install --include=dev && npm run install:all && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
+    envVars:
+      - key: NPM_CONFIG_PRODUCTION
+        value: "false"
