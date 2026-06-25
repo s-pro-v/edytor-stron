@@ -16,7 +16,8 @@
     "render-build": "npm install && npm run install:all && npm run build",
     "start": "node backend/dist/index.js",
     "start:prod": "cross-env NODE_ENV=production npm start",
-    "start:local": "npm run build && npm run start:prod"
+    "start:local": "npm run build && npm run start:prod",
+    "tunnel": "npx --yes cloudflared tunnel --url http://localhost:3001"
   },
   "dependencies": {
     "cross-env": "^7.0.3"
