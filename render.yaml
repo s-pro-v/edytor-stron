@@ -5,11 +5,6 @@ services:
     plan: free
     region: frankfurt
     branch: main
-    buildCommand: npm install && npm run install:all && npm run build
+    buildCommand: npm install --include=dev && npm run install:all && npm run build
     startCommand: npm start
     healthCheckPath: /api/health
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: NODE_VERSION
-        value: "20"
