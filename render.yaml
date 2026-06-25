@@ -3,10 +3,13 @@ services:
     name: edytor-stron
     runtime: node
     plan: free
+    region: frankfurt
+    branch: main
     buildCommand: npm install && npm run install:all && npm run build
     startCommand: npm start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
       - key: NODE_VERSION
-        value: 20
+        value: "20"

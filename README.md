@@ -94,7 +94,9 @@ Jeśli `git init` mówi, że repo już istnieje w złym miejscu (np. folder uży
 
 ---
 
-## Uruchomienie online (zalecane: Render)
+## Uruchomienie online (Render)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/s-pro-v/edytor-stron)
 
 **GitHub Pages** hostuje tylko statyczne pliki — **nie uruchomi** backendu (API + SQLite).  
 Pełna aplikacja wymaga serwera Node.js.
@@ -103,16 +105,15 @@ Najprościej: **Render** (darmowy plan) + repozytorium GitHub.
 
 ### Render — krok po kroku
 
-1. Konto na [render.com](https://render.com) (logowanie przez GitHub)
-2. **New → Blueprint** (lub **Web Service**)
-3. Połącz repozytorium `edytor-stron`
-4. Render wykryje plik `render.yaml` albo ustaw ręcznie:
-   - **Build command:** `npm install && npm run install:all && npm run build`
-   - **Start command:** `npm start`
-   - **Environment:** `NODE_ENV=production`
-5. Po deployu dostaniesz URL, np. `https://edytor-stron.onrender.com`
+1. Kliknij przycisk **Deploy to Render** powyżej (albo [render.com](https://render.com) → logowanie przez GitHub)
+2. **New → Blueprint**
+3. Połącz repozytorium [s-pro-v/edytor-stron](https://github.com/s-pro-v/edytor-stron)
+4. Render wykryje plik `render.yaml` — kliknij **Apply** / **Deploy Blueprint**
+5. Po deployu (ok. 3–5 min) dostaniesz URL, np. `https://edytor-stron.onrender.com`
 
 Backend serwuje wtedy **frontend + API** z jednej domeny — edytor działa od razu.
+
+> **Uwaga (plan free):** baza SQLite resetuje się przy każdym redeployu. Moduły seedują się automatycznie; własne projekty mogą zniknąć po aktualizacji.
 
 ### Produkcja lokalnie (test przed deployem)
 

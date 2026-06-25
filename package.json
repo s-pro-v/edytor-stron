@@ -11,9 +11,11 @@
     "build": "npm run build --prefix frontend",
     "start": "cross-env NODE_ENV=production tsx backend/src/index.ts"
   },
-  "devDependencies": {
-    "concurrently": "^9.2.0",
+  "dependencies": {
     "cross-env": "^7.0.3",
     "tsx": "^4.20.3"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
   }
 }
