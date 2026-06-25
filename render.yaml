@@ -6,5 +6,5 @@ services:
     region: frankfurt
     branch: main
     buildCommand: npm run render-build
-    startCommand: npm start
+    startCommand: NODE_ENV=production node backend/dist/index.js
     healthCheckPath: /api/health

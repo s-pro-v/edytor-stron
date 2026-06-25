@@ -7,13 +7,16 @@
     "node": ">=20"
   },
   "scripts": {
-    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
-    "dev:backend": "npm run dev --prefix backend",
-    "dev:frontend": "npm run dev --prefix frontend",
+    "setup": "npm install && npm run install:all",
+    "dev": "cross-env NODE_ENV=development concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cross-env NODE_ENV=development npm run dev --prefix backend",
+    "dev:frontend": "cross-env NODE_ENV=development npm run dev --prefix frontend",
     "install:all": "npm install --prefix backend && npm install --prefix frontend",
     "build": "npm run build --prefix frontend && npm run build --prefix backend",
     "render-build": "npm install && npm run install:all && npm run build",
-    "start": "cross-env NODE_ENV=production node backend/dist/index.js"
+    "start": "node backend/dist/index.js",
+    "start:prod": "cross-env NODE_ENV=production npm start",
+    "start:local": "npm run build && npm run start:prod"
   },
   "dependencies": {
     "cross-env": "^7.0.3"

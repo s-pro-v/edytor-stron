@@ -15,8 +15,9 @@ if (!fs.existsSync(dataDir)) {
 const db = initDatabase();
 const app = express();
 const PORT = Number(process.env.PORT) || 3001;
-const isProd = process.env.NODE_ENV === "production";
-const frontendDist = path.join(__dirname, "../../frontend/dist");
+const isProd =
+  process.env.NODE_ENV === "production" || process.env.RENDER === "true";
+const frontendDist = path.resolve(__dirname, "../../frontend/dist");
 
 app.use(
   cors({
@@ -30,20 +31,33 @@ app.use("/api/templates", createTemplatesRouter());
 app.use("/api/projects", createProjectsRouter(db));
 
 app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok" });
+  res.json({
+    status: "ok",
+    mode: isProd ? "production" : "development",
+    frontend: fs.existsSync(frontendDist),
+  });
 });
 
-if (isProd && fs.existsSync(frontendDist)) {
-  app.use(express.static(frontendDist));
-  app.get(/^(?!\/api).*/, (_req, res) => {
-    res.sendFile(path.join(frontendDist, "index.html"));
-  });
+if (isProd) {
+  if (fs.existsSync(frontendDist)) {
+    app.use(express.static(frontendDist));
+    app.get(/^(?!\/api).*/, (_req, res) => {
+      res.sendFile(path.join(frontendDist, "index.html"));
+    });
+  } else {
+    console.warn(
+      `Brak frontend/dist (${frontendDist}). Uruchom: npm run build`,
+    );
+  }
 }
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(
     isProd
       ? `Aplikacja działa na porcie ${PORT} (frontend + API)`
       : `Serwer API działa na http://localhost:${PORT}`,
   );
+  if (isProd) {
+    console.log(`Frontend: ${frontendDist} (${fs.existsSync(frontendDist) ? "OK" : "BRAK"})`);
+  }
 });
